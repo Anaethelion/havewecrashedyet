@@ -1,0 +1,46 @@
+name: Generate and Deploy Site to Pages Branch
+
+on:
+  push:
+    branches:
+      - main # Trigger when source code changes
+  schedule:
+    # Run every 15 minutes (adjust cron syntax as needed)
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Check out repository code (main branch)
+      uses: actions/checkout@v4
+      # This checks out the branch the workflow is running on (e.g., main for push/schedule)
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run script to generate index.html
+      env:
+        FINANCIAL_API_KEY: ${{ secrets.FINANCIAL_API_KEY }}
+      run: |
+        python generate_page.py # Script generates index.html in the workspace root
+
+    # --- New Step: Deploy generated files to the 'pages' branch ---
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }} # Provided automatically
+        publish_branch: pages # Branch to deploy to
+        publish_dir: . # Directory containing generated static files (root in this case)
+        commit_message: "Automated deployment: ${{ github.event.head_commit.message }}"

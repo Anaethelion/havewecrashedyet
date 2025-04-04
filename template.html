@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Have We Crashed Yet?</title>
+
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
+    <link rel="shortcut icon" href="/favicon.ico"> <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            text-align: center; /* Center all inline/text content globally */
+            background-color: #f0f0f0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 2.8em;
+            color: #333;
+            margin-bottom: 0.5em;
+        }
+        .status {
+            font-size: 4.5em;
+            font-weight: bold;
+            margin: 25px 0;
+            padding: 15px;
+            border-radius: 10px;
+            line-height: 1.2;
+            /* Color applied dynamically via class */
+        }
+        .status.no { color: #2ecc71; } /* Green */
+        .status.maybe { color: #f39c12; } /* Orange */
+        .status.yes { color: #e74c3c; } /* Red */
+        .status.wobbly { color: #e67e22; } /* Darker Orange */
+        .status.climbing { color: #27ae60; } /* Darker Green */
+        .status.bleeding { color: #c0392b; } /* Darker Red */
+        .status.sideways { color: #8e44ad; } /* Purple */
+        .status.error { color: #7f8c8d; } /* Grey for error */
+
+        /* Style for the arrow span */
+        .status-arrow {
+            display: inline-block; /* Allows margin */
+            margin-left: 0.2em; /* Add small space before arrow */
+            font-size: 0.9em; /* Slightly smaller than status text */
+             /* Color is inherited from parent .status div */
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #555;
+            margin-top: -15px;
+            margin-bottom: 40px;
+        }
+        .market-summary {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+            text-align: center;
+        }
+        .market-summary h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+        .market-summary p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .index-data {
+            font-size: 1.1em;
+            color: #444;
+        }
+        .index-data strong {
+            font-weight: 600;
+        }
+
+        .details-link {
+             display: inline-block;
+             margin-top: 25px;
+             padding: 12px 25px;
+             background-color: #3498db;
+             color: white;
+             text-decoration: none;
+             border-radius: 5px;
+             transition: background-color 0.3s ease, transform 0.1s ease;
+             font-weight: bold;
+        }
+        .details-link:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        footer {
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 25px;
+            font-size: 0.9em;
+            color: #888;
+            text-align: center;
+        }
+        footer p {
+             margin-bottom: 8px;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+       /* Styles for the visual humor iframe container */
+        .visual-humor {
+            /* Center the block itself */
+            margin: -10px auto 40px auto; /* Adjust top/bottom margin; auto left/right */
+
+            /* Control the size */
+            max-width: 480px; /* Set a max-width (adjust as needed) */
+            width: 90%; /* Allow it to shrink on smaller screens, up to max-width */
+
+            /* Ensure content like the 'via GIPHY' link text is centered */
+            text-align: center;
+        }
+
+        /* Style the iframe itself (optional, but good practice) */
+        .visual-humor iframe {
+            max-width: 100%; /* Ensure iframe doesn't overflow container */
+            border: none; /* Remove default iframe border */
+            display: block; /* Treat iframe like a block, helps with spacing/centering sometimes */
+            margin: 0 auto; /* Can help center iframe if its container div isn't 100% */
+        }
+
+        /* Adjust market summary margin if embed code is present */
+        .visual-humor + .market-summary {
+            margin-top: 0; /* Reduce top margin if embed provides space */
+        }
+
+        /* Make the 'via GIPHY' link less obtrusive (Optional) */
+        .visual-humor p {
+            margin-top: 5px;
+            font-size: 0.7em;
+            color: #aaa;
+            text-align: center; /* Explicitly center the paragraph text */
+        }
+        .visual-humor p a {
+             color: #aaa; /* Match link color */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Have We Crashed Yet?</h1>
+
+        <div id="status-indicator" class="status {{ status_class }}">
+            {{ status_text }}<span class="status-arrow">{{ status_arrow }}</span>
+        </div>
+        <p class="subtitle" id="status-subtitle">
+            {{ subtitle }}
+        </p>
+
+        <div class="visual-humor">
+            {% if giphy_embed_code %}
+                {{ giphy_embed_code | safe }} {# <--- USE THE |safe FILTER HERE #}
+            {% endif %}
+        </div>
+
+        <div class="market-summary">
+            <h2>Market Snapshot ({{ index_symbol }})</h2>
+            <p class="index-data">
+                Current Price: <strong>{{ index_current_price }}</strong>
+                &nbsp;|&nbsp;
+                Today's Change: <strong>{{ index_change_percent }}</strong>
+            </p>
+            <p style="font-size: 0.8em; color: #999;">
+                (*Based on S&P 500 index proxy data.)
+            </p>
+
+            <a href="https://www.google.com/finance/markets/indexes" class="details-link" target="_blank" rel="noopener noreferrer">View Market Indexes</a>
+
+        </div>
+
+        <footer>
+            <p>Page generated: <span id="last-updated">{{ generation_time }}</span></p>
+            {% if error_message %}
+            <p class="error-message">Error during last update: {{ error_message }}</p>
+            {% endif %}
+             <p style="font-size: 0.8em;">
+                *Disclaimer: Info/entertainment only. Not financial advice. Data from third-party APIs (e.g., Finnhub.io), may be delayed/approximate. Check provider ToS. Investing involves risk.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
